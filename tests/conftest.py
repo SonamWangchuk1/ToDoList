@@ -1,6 +1,10 @@
 import os
 import tempfile
+import sys
 import pytest
+
+# Ensure Python can find the 'app' package
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 from app import create_app, db
 from app.models import User
@@ -12,7 +16,7 @@ def app():
     db_fd, db_path = tempfile.mkstemp()
     os.close(db_fd)
 
-    # Ensure the app uses the temp database before initialization
+    # Use temp SQLite database
     os.environ["DATABASE_URL"] = f"sqlite:///{db_path}"
     os.environ["SECRET_KEY"] = "test-secret"
 
@@ -53,6 +57,8 @@ def create_user(email="user@example.com", password="secret123"):
 
 
 def login(client, email="user@example.com", password="secret123"):
-    return client.post("/auth/login", data={"email": email, "password": password}, follow_redirects=True)
-
-
+    return client.post(
+        "/auth/login",
+        data={"email": email, "password": password},
+        follow_redirects=True
+    )
