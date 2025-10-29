@@ -12,11 +12,13 @@ def app():
     db_fd, db_path = tempfile.mkstemp()
     os.close(db_fd)
 
+    # Ensure the app uses the temp database before initialization
+    os.environ["DATABASE_URL"] = f"sqlite:///{db_path}"
+    os.environ["SECRET_KEY"] = "test-secret"
+
     test_app = create_app()
     test_app.config.update(
         TESTING=True,
-        SECRET_KEY="test-secret",
-        SQLALCHEMY_DATABASE_URI=f"sqlite:///{db_path}",
     )
 
     with test_app.app_context():
@@ -25,7 +27,12 @@ def app():
 
     yield test_app
 
-    os.unlink(db_path)
+    # Cleanup
+    try:
+        os.unlink(db_path)
+    finally:
+        os.environ.pop("DATABASE_URL", None)
+        os.environ.pop("SECRET_KEY", None)
 
 
 @pytest.fixture()
