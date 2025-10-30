@@ -18,5 +18,3 @@ COPY . .
 EXPOSE 5000
 
 CMD ["python", "wsgi.py"]
-
-
